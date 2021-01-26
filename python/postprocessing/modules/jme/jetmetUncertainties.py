@@ -70,14 +70,14 @@ class jetmetUncertaintiesProducer(Module):
                 + "deprecated! Please use jetmetHelperRun2 in the future."
             )
             if era == "2016":
-                self.jerInputFileName = "Summer16_25nsV1_MC_PtResolution_" + jetType + ".txt"
-                self.jerUncertaintyInputFileName = "Summer16_25nsV1_MC_SF_" + jetType + ".txt"
-            elif era == "2017" or era == "2018":  # use 2017 JER for 2018 for the time being
-                self.jerInputFileName = "Fall17_V3_MC_PtResolution_" + jetType + ".txt"
-                self.jerUncertaintyInputFileName = "Fall17_V3_MC_SF_" + jetType + ".txt"
-            elif era == "2018" and False:  # jetSmearer not working with 2018 JERs yet
-                self.jerInputFileName = "Autumn18_V7_MC_PtResolution_" + jetType + ".txt"
-                self.jerUncertaintyInputFileName = "Autumn18_V7_MC_SF_" + jetType + ".txt"
+                self.jerInputFileName = "Summer16_25nsV1b_MC_PtResolution_" + jetType + ".txt"
+                self.jerUncertaintyInputFileName = "Summer16_25nsV1b_MC_SF_" + jetType + ".txt"
+            elif era == "2017":  # use 2017 JER for 2018 for the time being
+                self.jerInputFileName = "Summer19UL17_JRV3_MC_PtResolution_" + jetType + ".txt"
+                self.jerUncertaintyInputFileName = "Summer19UL17_JRV3_MC_SF_" + jetType + ".txt"
+            elif era == "2018":  # jetSmearer not working with 2018 JERs yet
+                self.jerInputFileName = "Summer19UL18_JRV2_MC_PtResolution_" + jetType + ".txt"
+                self.jerUncertaintyInputFileName = "Summer19UL18_JRV2_MC_SF_" + jetType + ".txt"
 
         self.jetSmearer = jetSmearer(globalTag, jetType, self.jerInputFileName,
                                      self.jerUncertaintyInputFileName)
@@ -1023,20 +1023,42 @@ class jetmetUncertaintiesProducer(Module):
 # having them loaded when not needed
 jetmetUncertainties2016 = lambda: jetmetUncertaintiesProducer(
     "2016", "Summer16_07Aug2017_V11_MC", ["Total"])
+jetmetUncertainties2016RunBCD = lambda: jetmetUncertaintiesProducer(
+    "2016", "Summer16_07Aug2017BCD_V11_DATA", ["Total"], isData=True)
+jetmetUncertainties2016RunEF = lambda: jetmetUncertaintiesProducer(
+    "2016", "Summer16_07Aug2017EF_V11_DATA", ["Total"], isData=True)
+jetmetUncertainties2016RunGH = lambda: jetmetUncertaintiesProducer(
+    "2016", "Summer16_07Aug2017GHV11_DATA", ["Total"], isData=True)
 jetmetUncertainties2016All = lambda: jetmetUncertaintiesProducer(
     "2016", "Summer16_07Aug2017_V11_MC", ["All"])
 
 jetmetUncertainties2017 = lambda: jetmetUncertaintiesProducer(
-    "2017", "Fall17_17Nov2017_V32_MC", ["Total"])
+    "2017", "Summer19UL17_V5_MC", ["Total"])
+jetmetUncertainties2017RunB = lambda: jetmetUncertaintiesProducer(
+    "2017", "Summer19UL17_RunB_V6_DATA", ["Total"],isData=True)
+jetmetUncertainties2017RunC = lambda: jetmetUncertaintiesProducer(
+    "2017", "Summer19UL17_RunC_V6_DATA", ["Total"],isData=True)
+jetmetUncertainties2017RunD = lambda: jetmetUncertaintiesProducer(
+    "2017", "Summer19UL17_RunD_V6_DATA", ["Total"],isData=True)
+jetmetUncertainties2017RunE = lambda: jetmetUncertaintiesProducer(
+    "2017", "Summer19UL17_RunE_V6_DATA", ["Total"],isData=True)
+jetmetUncertainties2017RunF = lambda: jetmetUncertaintiesProducer(
+    "2017", "Summer19UL17_RunF_V6_DATA", ["Total"],isData=True)
 jetmetUncertainties2017METv2 = lambda: jetmetUncertaintiesProducer(
     "2017", "Fall17_17Nov2017_V32_MC", metBranchName='METFixEE2017')
 jetmetUncertainties2017All = lambda: jetmetUncertaintiesProducer(
     "2017", "Fall17_17Nov2017_V32_MC", ["All"])
 
 jetmetUncertainties2018 = lambda: jetmetUncertaintiesProducer(
-    "2018", "Autumn18_V8_MC", ["Total"])
-jetmetUncertainties2018Data = lambda: jetmetUncertaintiesProducer(
-    "2018", "Autumn18_RunB_V8_DATA", archive="Autumn18_V8_DATA", isData=True)
+    "2018", "Summer19UL18_V5_MC", ["Total"])
+jetmetUncertainties2018RunA = lambda: jetmetUncertaintiesProducer(
+    "2018", "Summer19UL18_RunA_V5_DATA", isData=True)
+jetmetUncertainties2018RunB = lambda: jetmetUncertaintiesProducer(
+    "2018", "Summer19UL18_RunB_V5_DATA", isData=True)
+jetmetUncertainties2018RunC = lambda: jetmetUncertaintiesProducer(
+    "2018", "Summer19UL18_RunC_V5_DATA", isData=True)
+jetmetUncertainties2018RunD = lambda: jetmetUncertaintiesProducer(
+    "2018", "Summer19UL18_RunD_V5_DATA", isData=True)
 jetmetUncertainties2018All = lambda: jetmetUncertaintiesProducer(
     "2018", "Autumn18_V8_MC", ["All"])
 

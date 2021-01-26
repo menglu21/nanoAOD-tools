@@ -17,6 +17,7 @@ class jetRecalib(Module):
     def __init__(self, globalTag, archive, jetType="AK4PFchs", redoJEC=False):
 
         self.redoJEC = redoJEC
+        self.jetType = jetType
 
         if "AK4" in jetType:
             self.jetBranchName = "Jet"
@@ -83,15 +84,16 @@ class jetRecalib(Module):
         self.out.branch("%s_mass_nom" % self.jetBranchName,
                         "F",
                         lenVar=self.lenVar)
-        self.out.branch("%s_msoftdrop_raw" % self.jetBranchName,
-                        "F",
-                        lenVar=self.lenVar)
-        self.out.branch("%s_msoftdrop_nom" % self.jetBranchName,
-                        "F",
-                        lenVar=self.lenVar)
-        self.out.branch("%s_groomed_corr_PUPPI" % self.jetBranchName,
-                        "F",
-                        lenVar=self.lenVar)
+	if "AK8 in jetType::
+            self.out.branch("%s_msoftdrop_raw" % self.jetBranchName,
+                            "F",
+                            lenVar=self.lenVar)
+            self.out.branch("%s_msoftdrop_nom" % self.jetBranchName,
+                            "F",
+                            lenVar=self.lenVar)
+            self.out.branch("%s_groomed_corr_PUPPI" % self.jetBranchName,
+                            "F",
+                            lenVar=self.lenVar)
         self.out.branch("MET_pt_nom", "F")
         self.out.branch("MET_phi_nom", "F")
         self.out.branch("%s_corr_JEC" % self.jetBranchName,
@@ -105,16 +107,18 @@ class jetRecalib(Module):
         """process event, return True (go to next module) or False (fail,
         go to next event)"""
         jets = Collection(event, self.jetBranchName)
-        subJets = Collection(event, self.subJetBranchName)
+	if "AK8" in jetType:
+            subJets = Collection(event, self.subJetBranchName)
         met = Object(event, "MET")
 
         jets_pt_raw = []
         jets_pt_nom = []
         jets_mass_raw = []
         jets_mass_nom = []
-        jets_msoftdrop_raw = []
-        jets_msoftdrop_nom = []
-        jets_groomed_corr_PUPPI = []
+	if "AK8" in jetType:
+            jets_msoftdrop_raw = []
+            jets_msoftdrop_nom = []
+            jets_groomed_corr_PUPPI = []
         jets_corr_JEC = []
         (met_px, met_py) = (met.pt * math.cos(met.phi),
                             met.pt * math.sin(met.phi))
@@ -140,7 +144,7 @@ class jetRecalib(Module):
                 (jet_pt, jet_mass) = self.jetReCalibrator.correct(jet, rho)
             jets_pt_raw.append(jet_rawpt)
             jets_mass_raw.append(jet_rawmass)
-            jets_corr_JEC.append(jet_pt, jet_rawpt)
+            jets_corr_JEC.append(jet_pt - jet_rawpt)
 
             jet_pt_nom = jet_pt  # don't smear resolution in data
             if jet_pt_nom < 0.0:
@@ -159,43 +163,45 @@ class jetRecalib(Module):
                 met_py_nom = met_py_nom - (jet_pt_nom - jet.pt) * jet_sinPhi
 
             # Do PUPPI SD mass correction
-            if jet.subJetIdx1 >= 0 and jet.subJetIdx2 >= 0:
-                groomedP4 = subJets[jet.subJetIdx1].p4() + subJets[
-                    jet.subJetIdx2].p4()  # check subjet jecs
-            else:
-                groomedP4 = None
+	    if "AK8" in self.jetType:
+                if jet.subJetIdx1 >= 0 and jet.subJetIdx2 >= 0:
+                    groomedP4 = subJets[jet.subJetIdx1].p4() + subJets[
+                        jet.subJetIdx2].p4()  # check subjet jecs
+                else:
+                    groomedP4 = None
 
-            jets_msoftdrop_raw.append(
-                0.0) if groomedP4 == None else jets_msoftdrop_raw.append(
-                    groomedP4.M())
+                jets_msoftdrop_raw.append(
+                    0.0) if groomedP4 == None else jets_msoftdrop_raw.append(
+                        groomedP4.M())
 
-            puppisd_genCorr = self.puppisd_corrGEN.Eval(jet.pt)
-            if abs(jet.eta) <= 1.3:
-                puppisd_recoCorr = self.puppisd_corrRECO_cen.Eval(jet.pt)
-            else:
-                puppisd_recoCorr = self.puppisd_corrRECO_for.Eval(jet.pt)
+                puppisd_genCorr = self.puppisd_corrGEN.Eval(jet.pt)
+                if abs(jet.eta) <= 1.3:
+                    puppisd_recoCorr = self.puppisd_corrRECO_cen.Eval(jet.pt)
+                else:
+                    puppisd_recoCorr = self.puppisd_corrRECO_for.Eval(jet.pt)
 
-            puppisd_total = puppisd_genCorr * puppisd_recoCorr
-            if groomedP4 != None:
-                groomedP4.SetPtEtaPhiM(groomedP4.Perp(), groomedP4.Eta(),
-                                       groomedP4.Phi(),
-                                       groomedP4.M() * puppisd_total)
+                puppisd_total = puppisd_genCorr * puppisd_recoCorr
+                if groomedP4 != None:
+                    groomedP4.SetPtEtaPhiM(groomedP4.Perp(), groomedP4.Eta(),
+                                           groomedP4.Phi(),
+                                           groomedP4.M() * puppisd_total)
 
-            jets_groomed_corr_PUPPI.append(puppisd_total)
-            jets_msoftdrop_nom.append(
-                0.0) if groomedP4 == None else jets_msoftdrop_nom.append(
-                    groomedP4.M())
+                jets_groomed_corr_PUPPI.append(puppisd_total)
+                jets_msoftdrop_nom.append(
+                    0.0) if groomedP4 == None else jets_msoftdrop_nom.append(
+                        groomedP4.M())
 
         self.out.fillBranch("%s_pt_raw" % self.jetBranchName, jets_pt_raw)
         self.out.fillBranch("%s_pt_nom" % self.jetBranchName, jets_pt_nom)
         self.out.fillBranch("%s_mass_raw" % self.jetBranchName, jets_mass_raw)
         self.out.fillBranch("%s_mass_nom" % self.jetBranchName, jets_mass_nom)
-        self.out.fillBranch("%s_groomed_corr_PUPPI" % self.jetBranchName,
-                            jets_groomed_corr_PUPPI)
-        self.out.fillBranch("%s_msoftdrop_raw" % self.jetBranchName,
-                            jets_msoftdrop_raw)
-        self.out.fillBranch("%s_msoftdrop_nom" % self.jetBranchName,
-                            jets_msoftdrop_nom)
+	if "AK8" in self.jetType:
+            self.out.fillBranch("%s_groomed_corr_PUPPI" % self.jetBranchName,
+                                jets_groomed_corr_PUPPI)
+            self.out.fillBranch("%s_msoftdrop_raw" % self.jetBranchName,
+                                jets_msoftdrop_raw)
+            self.out.fillBranch("%s_msoftdrop_nom" % self.jetBranchName,
+                                jets_msoftdrop_nom)
         self.out.fillBranch("MET_pt_nom",
                             math.sqrt(met_px_nom**2 + met_py_nom**2))
         self.out.fillBranch("MET_phi_nom", math.atan2(met_py_nom, met_px_nom))
